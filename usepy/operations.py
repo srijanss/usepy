@@ -55,14 +55,14 @@ class Operations(object):
                     self.copy(**rkwargs)
                 else:
                     # Read file in source
-                    with open(src_dir + os.sep + fl, 'r') as srcfl:
+                    with open(src_dir + os.sep + fl, 'rb') as srcfl:
                         srcfl_content = srcfl.read()
                     # Write file to destinations
                     if os.path.isdir(dest_dir) and os.path.isdir(dest_dir + os.sep + dest_file):
                         dest_file = dest_dir + os.sep + fl
                     elif os.path.isdir(dest_dir) and not os.path.isdir(dest_dir + os.sep + dest_file):
                         dest_file = dest_dir + os.sep + dest_file 
-                    with open(dest_file, 'w') as destfl:
+                    with open(dest_file, 'wb') as destfl:
                         print('Copying {} to {}'.format(src_dir + os.sep + fl, dest_file))
                         destfl.write(srcfl_content)
                         dest_file = temp_dest_file 

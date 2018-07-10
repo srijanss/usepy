@@ -10,6 +10,7 @@ Operations of the project
 import os
 import sys
 import shutil
+import inspect
 
 home_dir = os.path.expanduser('~')
 
@@ -177,8 +178,9 @@ class Operations(object):
     def is_valid_file(self, dirpath, flag='SRC'):
         if flag == 'SRC':
             # Source file Exists
+            print()
             if dirpath[-1] == '/': # Directory
-                raise IOError('{} File to copy not provided'.format(dirpath))
+                raise IOError('{} File to {} not provided'.format(dirpath, inspect.stack()[1][3]))
             elif ('{' in (dirpath[-1][0]) and '}' in dirpath[-1][-1]) or '*' in dirpath[-1]:
                 self.file_exists(dirpath[:-1])
             file_dir, dir_file = self.parse_files(dirpath)

@@ -39,19 +39,16 @@ class Operations(object):
         try:
             src_dir, src_files = self.is_valid_file(kwargs['src'], flag='SRC')
             dest_dir, dest_file = self.is_valid_file(kwargs['dest'], flag='DEST')
-            # Read from source, Write to destination
             srcfl_content = ''
             temp_dest_file = dest_file
             for fl in src_files:
                 if os.path.islink(src_dir + os.sep + fl):
-                    # print('Skipping symlink {}'.format(src_dir + os.sep + fl))
                     try:
                         os.symlink(src_dir + os.sep + fl, dest_dir + os.sep + fl)
                         print('Copying Symlinks from {} to {}'.format(os.path.realpath(src_dir + os.sep + fl), dest_dir + os.sep + fl))
                     except FileExistsError:
                         pass
                 elif os.path.isdir(src_dir + os.sep + fl):
-                    # print('{} is a directory'.format(fl))
                     if src_dir + os.sep + fl == dest_dir:
                         continue
                     try:
@@ -133,9 +130,6 @@ class Operations(object):
         try:
             src_dir, src_files = self.is_valid_file(kwargs['src'], flag='SRC')
             dest_dir, dest_file = self.is_valid_file(kwargs['dest'], flag='DEST')
-            # Read from source, Write to destination
-            srcfl_content = ''
-            temp_dest_file = dest_file
             for fl in src_files:
                 if dest_file:
                     res_dest = shutil.move(src_dir + os.sep + fl, dest_dir + os.sep + dest_file)

@@ -9,6 +9,7 @@ Operations of the project
 """
 import os
 import sys
+import shutil
 
 home_dir = os.path.expanduser('~')
 
@@ -17,7 +18,7 @@ class Operations(object):
     def __init__(self):
         pass
 
-    def copy(self, *file_to_copy, **kwargs):
+    def copy(self, **kwargs):
         """
         -- Source
             -- File copy
@@ -42,8 +43,13 @@ class Operations(object):
             temp_dest_file = dest_file
             for fl in src_files:
                 if os.path.islink(src_dir + os.sep + fl):
-                    print('Skipping symlink {}'.format(src_dir + os.sep + fl))
-                elif os.path.isdir(src_dir + os.sep + fl): 
+                    # print('Skipping symlink {}'.format(src_dir + os.sep + fl))
+                    try:
+                        os.symlink(src_dir + os.sep + fl, dest_dir + os.sep + fl)
+                        print('Copying Symlinks from {} to {}'.format(os.path.realpath(src_dir + os.sep + fl), dest_dir + os.sep + fl))
+                    except FileExistsError:
+                        pass
+                elif os.path.isdir(src_dir + os.sep + fl):
                     # print('{} is a directory'.format(fl))
                     if src_dir + os.sep + fl == dest_dir:
                         continue
@@ -54,18 +60,16 @@ class Operations(object):
                     rkwargs = {'src': src_dir + os.sep + fl + '/*', 'dest': dest_dir + os.sep + fl + os.sep}
                     self.copy(**rkwargs)
                 else:
-                    # Read file in source
-                    with open(src_dir + os.sep + fl, 'rb') as srcfl:
-                        srcfl_content = srcfl.read()
-                    # Write file to destinations
                     if os.path.isdir(dest_dir) and os.path.isdir(dest_dir + os.sep + dest_file):
                         dest_file = dest_dir + os.sep + fl
                     elif os.path.isdir(dest_dir) and not os.path.isdir(dest_dir + os.sep + dest_file):
                         dest_file = dest_dir + os.sep + dest_file 
-                    with open(dest_file, 'wb') as destfl:
-                        print('Copying {} to {}'.format(src_dir + os.sep + fl, dest_file))
-                        destfl.write(srcfl_content)
-                        dest_file = temp_dest_file 
+                    res_dest = shutil.copy2(src_dir + os.sep + fl, dest_file)
+                    if res_dest == dest_dir + os.sep + fl:
+                        print('Copying {} to {}'.format(src_dir + os.sep + fl, res_dest))
+                    else:
+                        print('Error Copying {} to {}'.format(src_dir + os.sep + fl, res_dest))
+                    dest_file = temp_dest_file 
         except IOError as err:
             print(err)
 
@@ -108,29 +112,67 @@ class Operations(object):
         """
         pass
 
-    def move(self, *file_to_move, **src_dest):
+    def move(self, **kwargs):
         """
-        * - move all
-        test.txt - move specific
-        test.* - move all that match pattern
-        test1, test2, test3 - move multiple
-        -- args
-        *file_to_move -- tuple containing file or files to move
-        **kwargs -- dict containing source dir, destination dir
-        """
-        pass
+        -- Source
+            -- File move
+            kwargs['src'] = '/home/srijan/test1.txt' 
+            kwargs['src'] = '/home/srijan/{test1.txt,test2.txt}' 
+            kwargs['src'] = '/home/srijan/*' 
+            -- Directory move
+            kwargs['src'] = '/home/srijan/' 
+            kwargs['src'] = '/home/srijan' 
 
-    def delete(self, *file_to_delete, **dir):
+        -- Destination
+            -- Move to destination with new filename
+            kwargs['dest'] = '/home/srijan/copyto/test2.txt'
+            -- Move to destination folder
+            kwargs['dest'] = '/home/srijan/copyto'
         """
-        * - delete all
-        test.txt - delete specific
-        test.* - delete all that match pattern
-        test1, test2, test3 - delete multiple
-        -- args
-        *file_to_delete -- tuple containing file or files to delete
-        **kwargs -- dict containing source dir
+        try:
+            src_dir, src_files = self.is_valid_file(kwargs['src'], flag='SRC')
+            dest_dir, dest_file = self.is_valid_file(kwargs['dest'], flag='DEST')
+            # Read from source, Write to destination
+            srcfl_content = ''
+            temp_dest_file = dest_file
+            for fl in src_files:
+                if dest_file:
+                    res_dest = shutil.move(src_dir + os.sep + fl, dest_dir + os.sep + dest_file)
+                else:
+                    res_dest = shutil.move(src_dir + os.sep + fl, dest_dir)
+                if res_dest == dest_dir + os.sep + fl:
+                    print('Moving {} to {}'.format(src_dir + os.sep + fl, res_dest))
+                else:
+                    print('Error Moving {} to {}'.format(src_dir + os.sep + fl, res_dest))
+        except IOError as err:
+            print(err)
+
+    def delete(self, **kwargs):
         """
-        pass
+        -- Source
+            -- File delete 
+            kwargs['src'] = '/home/srijan/test1.txt' 
+            kwargs['src'] = '/home/srijan/{test1.txt,test2.txt}' 
+            kwargs['src'] = '/home/srijan/*' 
+            -- Directory delete 
+            kwargs['src'] = '/home/srijan/' 
+            kwargs['src'] = '/home/srijan' 
+        """
+        try:
+            src_dir, src_files = self.is_valid_file(kwargs['src'], flag='SRC')
+            if src_files:
+                for fl in src_files:
+                    if os.path.isdir(src_dir) and os.path.isdir(src_dir + os.sep + fl):
+                        shutil.rmtree(src_dir + os.sep + fl)
+                        print('Deleting {} '.format(src_dir + os.sep + fl))
+                    elif os.path.isdir(src_dir) and not os.path.isdir(src_dir + os.sep + fl):
+                        os.remove(src_dir + os.sep + fl)
+                        print('Deleting {} '.format(src_dir + os.sep + fl))
+            else:
+                shutil.rmtree(src_dir)
+                print('Deleting {} '.format(src_dir))
+        except IOError as err:
+            print(err)
 
     def is_valid_file(self, dirpath, flag='SRC'):
         if flag == 'SRC':

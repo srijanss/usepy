@@ -16,7 +16,7 @@ def setup_function():
         os.mkdir(test_dir)
     except FileExistsError:
         pass
-    files = ['test.txt', 'test.html', 'main.css']
+    files = ['test.txt', 'test.html', 'main.css', 'last.txt']
     for fl in files:
         cmd = ['touch', test_dir + os.sep + fl]
         subprocess.Popen(cmd).wait()
@@ -121,3 +121,72 @@ def test_copy(op):
     assert 'main.css' in new_dir_contents 
     assert 'INNER_DIR' in new_dir_contents
     assert 'NEW_DIR' not in new_dir_contents
+
+def test_move(op):
+    src_filepath = test_dir + os.sep + 'test.txt'
+    dest_filepath = new_dir + os.sep + 'test2.txt'
+    kwargs = {'src': src_filepath, 'dest': dest_filepath}
+    op.move(**kwargs)
+    new_dir_contents = os.listdir(new_dir)
+    assert 'test2.txt' in new_dir_contents
+    assert 'test.txt' not in os.listdir(test_dir)
+    # Multiple file
+    src_filepath = test_dir + os.sep + '{main.css,test.html}'
+    dest_filepath = new_dir + os.sep
+    kwargs = {'src': src_filepath, 'dest': dest_filepath}
+    op.move(**kwargs)
+    new_dir_contents = os.listdir(new_dir)
+    assert 'test.html' in new_dir_contents
+    assert 'main.css' in new_dir_contents
+    assert 'test.html' not in os.listdir(test_dir)
+    assert 'main.css' not in os.listdir(test_dir)
+    # All file
+    src_filepath = test_dir + os.sep + '*'
+    dest_filepath = new_dir + os.sep
+    kwargs = {'src': src_filepath, 'dest': dest_filepath}
+    op.move(**kwargs)
+    new_dir_contents = os.listdir(new_dir)
+    assert 'test2.txt' in new_dir_contents 
+    assert 'test.html' in new_dir_contents 
+    assert 'main.css' in new_dir_contents 
+    assert 'INNER_DIR' in new_dir_contents
+    assert 'NEW_DIR' not in new_dir_contents
+    assert 'last.txt' in new_dir_contents
+    # Move directory
+    src_filepath = new_dir + os.sep + 'INNER_DIR'
+    dest_filepath = test_dir
+    kwargs = {'src': src_filepath, 'dest': dest_filepath}
+    op.move(**kwargs)
+    new_dir_contents = os.listdir(new_dir)
+    assert 'INNER_DIR' not in new_dir_contents
+    assert 'INNER_DIR' in os.listdir(test_dir)
+
+def test_delete(op):
+    src_filepath = test_dir + os.sep + 'test.txt'
+    kwargs = {'src': src_filepath}
+    op.delete(**kwargs)
+    assert 'test2.txt' not in os.listdir(test_dir)
+    # Multiple file
+    src_filepath = test_dir + os.sep + '{main.css,test.html}'
+    kwargs = {'src': src_filepath}
+    op.delete(**kwargs)
+    new_dir_contents = os.listdir(test_dir)
+    assert 'test.html' not in new_dir_contents
+    assert 'main.css' not in new_dir_contents
+    # All file
+    src_filepath = test_dir + os.sep + '*'
+    kwargs = {'src': src_filepath}
+    op.delete(**kwargs)
+    new_dir_contents = os.listdir(test_dir)
+    assert 'test.html' not in new_dir_contents 
+    assert 'main.css' not in new_dir_contents 
+    assert 'INNER_DIR' not in new_dir_contents
+    assert 'NEW_DIR' not in new_dir_contents
+    assert 'last.txt' not in new_dir_contents
+    # Delete directory
+    os.mkdir(test_dir + os.sep + 'LAST_DIR')
+    src_filepath = test_dir + os.sep + 'LAST_DIR'
+    kwargs = {'src': src_filepath}
+    op.delete(**kwargs)
+    new_dir_contents = os.listdir(test_dir)
+    assert 'LAST_DIR' not in new_dir_contents

@@ -71,44 +71,93 @@ class Operations(object):
         except IOError as err:
             print(err)
 
-    def rename(self, *file_to_rename, **kwargs):
+    def rename(self, **kwargs):
         """
-        * - rename all
-        test.txt - rename specific
-        test.* - rename all that match pattern
-        test1, test2, test3 - rename multiple
-        -- args
-        *file_to_rename -- tuple containing file or files to rename 
-        **kwargs -- dict containing source dir, destination dir, 
-                texttouse
+        -- Source
+            -- File rename 
+            kwargs['src'] = '/home/srijan/test1.txt' 
+            kwargs['src'] = '/home/srijan/*' 
+            -- Directory rename
+            kwargs['src'] = '/home/srijan/' 
+            kwargs['src'] = '/home/srijan' 
         """
-        pass
+        try:
+            src_dir, src_files = self.is_valid_file(kwargs['src'], flag='SRC')
+            rename_text = kwargs['rename_text']
+            if src_files:
+                for fl in src_files:
+                    if os.path.isdir(src_dir) and os.path.isdir(src_dir + os.sep + fl):
+                        os.rename(src_dir + os.sep + fl, src_dir + os.sep + rename_text)
+                        print('Renaming {} to {}'.format(src_dir + os.sep + fl, src_dir + os.sep + rename_text))
+                    else:
+                        ext = fl.split('.')[1]
+                        os.rename(src_dir + os.sep + fl, src_dir + os.sep + rename_text + '.' + ext)
+                        print('Renaming {} to {}'.format(src_dir + os.sep + fl, src_dir + os.sep + rename_text + '.' + ext))
+            else:
+                base_dir = os.sep.join(src_dir.split(os.sep)[:-1])
+                os.rename(src_dir,  base_dir + os.sep + rename_text)
+                print('Renaming {} to {}'.format(src_dir, base_dir + os.sep + rename_text))
+        except IOError as err:
+            print(err)
 
     def rename_prepend(self, *file_to_rename, **kwargs):
         """
-        * - rename_prepend all
-        test.txt - rename_prepend specific
-        test.* - rename_prepend all that match pattern
-        test1, test2, test3 - rename_prepend multiple
-        -- args
-        *file_to_rename -- tuple containing file or files to rename
-        **kwargs -- dict containing source dir, destination dir, 
-                texttouse
+        -- Source
+            -- File rename 
+            kwargs['src'] = '/home/srijan/test1.txt' 
+            kwargs['src'] = '/home/srijan/{test1.txt,test2.txt}' 
+            kwargs['src'] = '/home/srijan/*' 
+            -- Directory rename
+            kwargs['src'] = '/home/srijan/' 
+            kwargs['src'] = '/home/srijan' 
         """
-        pass
+        try:
+            src_dir, src_files = self.is_valid_file(kwargs['src'], flag='SRC')
+            rename_text = kwargs['rename_text']
+            separator = '_' if 'separator' not in kwargs else kwargs['separator']
+            if src_files:
+                for fl in src_files:
+                    os.rename(src_dir + os.sep + fl, src_dir + os.sep + rename_text + separator + fl)
+                    print('Renaming {} to {}'.format(src_dir + os.sep + fl, src_dir + os.sep + rename_text + separator + fl))
+            else:
+                base_dir = os.sep.join(src_dir.split(os.sep)[:-1])
+                change_dir = src_dir.split(os.sep)[-1]
+                os.rename(src_dir,  base_dir + os.sep + rename_text + separator + change_dir)
+                print('Renaming {} to {}'.format(src_dir, base_dir + os.sep + rename_text + separator + change_dir))
+        except IOError as err:
+            print(err)
 
     def rename_append(self, *file_to_rename, **kwargs):
         """
-        * - rename_append all
-        test.txt - rename_append specific
-        test.* - rename_prepend all that match pattern
-        test1, test2, test3 - rename_prepend multiple
-        -- args
-        *file_to_rename -- tuple containing file or files to rename
-        **kwargs -- dict containing source dir, destination dir, 
-                texttouse
+        -- Source
+            -- File rename 
+            kwargs['src'] = '/home/srijan/test1.txt' 
+            kwargs['src'] = '/home/srijan/{test1.txt,test2.txt}' 
+            kwargs['src'] = '/home/srijan/*' 
+            -- Directory rename
+            kwargs['src'] = '/home/srijan/' 
+            kwargs['src'] = '/home/srijan' 
         """
-        pass
+        try:
+            src_dir, src_files = self.is_valid_file(kwargs['src'], flag='SRC')
+            rename_text = kwargs['rename_text']
+            separator = '_' if 'separator' not in kwargs else kwargs['separator']
+            if src_files:
+                for fl in src_files:
+                    if os.path.isdir(src_dir) and os.path.isdir(src_dir + os.sep + fl):
+                        os.rename(src_dir + os.sep + fl, src_dir + os.sep + fl + separator + rename_text)
+                        print('Renaming {} to {}'.format(src_dir + os.sep + fl, src_dir + os.sep + fl + separator + rename_text))
+                    else:
+                        filename, ext = fl.split('.')
+                        os.rename(src_dir + os.sep + fl, src_dir + os.sep + filename + separator + rename_text + '.' + ext)
+                        print('Renaming {} to {}'.format(src_dir + os.sep + fl, src_dir + os.sep + filename + separator + rename_text + '.' + ext))
+            else:
+                base_dir = os.sep.join(src_dir.split(os.sep)[:-1])
+                change_dir = src_dir.split(os.sep)[-1]
+                os.rename(src_dir,  base_dir + os.sep + change_dir + separator + rename_text)
+                print('Renaming {} to {}'.format(src_dir, base_dir + os.sep + change_dir + separator + rename_text))
+        except IOError as err:
+            print(err)
 
     def move(self, **kwargs):
         """
@@ -168,6 +217,34 @@ class Operations(object):
                 print('Deleting {} '.format(src_dir))
         except IOError as err:
             print(err)
+
+    def find(self, **kwargs):
+        pass
+
+    def backup(self, **kwargs):
+        """
+        -- Source
+            -- File backup 
+            kwargs['src'] = '/home/srijan/test1.txt' 
+            kwargs['src'] = '/home/srijan/{test1.txt,test2.txt}' 
+            kwargs['src'] = '/home/srijan/*' 
+            -- Directory backup 
+            kwargs['src'] = '/home/srijan/' 
+            kwargs['src'] = '/home/srijan' 
+
+        -- Destination
+            -- Backup to destination with new filename
+            kwargs['dest'] = '/home/srijan/copyto/test2.txt'
+            -- Backup to destination folder
+            kwargs['dest'] = '/home/srijan/copyto'
+        """
+        pass
+
+    def encrypt(self, **kwargs):
+        pass
+
+    def decrypt(self, **kwargs):
+        pass
 
     def is_valid_file(self, dirpath, flag='SRC'):
         if flag == 'SRC':

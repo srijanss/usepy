@@ -190,3 +190,54 @@ def test_delete(op):
     op.delete(**kwargs)
     new_dir_contents = os.listdir(test_dir)
     assert 'LAST_DIR' not in new_dir_contents
+
+def test_rename(op):
+    src_filepath = test_dir + os.sep + 'test.txt'
+    kwargs = {'src': src_filepath, 'rename_text': 'rename'}
+    op.rename(**kwargs)
+    assert 'test.txt' not in os.listdir(test_dir)
+    assert 'rename.txt' in os.listdir(test_dir)
+    # rename dir
+    src_filepath = test_dir + os.sep + 'INNER_DIR'
+    kwargs = {'src': src_filepath, 'rename_text': 'DIR_INNER'}
+    op.rename(**kwargs)
+    assert 'INNER_DIR' not in os.listdir(test_dir)
+    assert 'DIR_INNER' in os.listdir(test_dir)
+
+def test_rename_prepend(op):
+    src_filepath = test_dir + os.sep + 'test.txt'
+    kwargs = {'src': src_filepath, 'rename_text': 'rename'}
+    op.rename_prepend(**kwargs)
+    assert 'test.txt' not in os.listdir(test_dir)
+    assert 'rename_test.txt' in os.listdir(test_dir)
+    # different separator
+    src_filepath = test_dir + os.sep + 'test.html'
+    kwargs = {'src': src_filepath, 'rename_text': 'rename', 'separator': '%'}
+    op.rename_prepend(**kwargs)
+    assert 'test.html' not in os.listdir(test_dir)
+    assert 'rename%test.html' in os.listdir(test_dir)
+    # rename dir
+    src_filepath = test_dir + os.sep + 'INNER_DIR'
+    kwargs = {'src': src_filepath, 'rename_text': 'RENAME'}
+    op.rename_prepend(**kwargs)
+    assert 'INNER_DIR' not in os.listdir(test_dir)
+    assert 'RENAME_INNER_DIR' in os.listdir(test_dir)
+
+def test_rename_append(op):
+    src_filepath = test_dir + os.sep + 'test.txt'
+    kwargs = {'src': src_filepath, 'rename_text': 'rename'}
+    op.rename_append(**kwargs)
+    assert 'test.txt' not in os.listdir(test_dir)
+    assert 'test_rename.txt' in os.listdir(test_dir)
+    # different separator
+    src_filepath = test_dir + os.sep + 'test.html'
+    kwargs = {'src': src_filepath, 'rename_text': 'rename', 'separator': '%'}
+    op.rename_append(**kwargs)
+    assert 'test.html' not in os.listdir(test_dir)
+    assert 'test%rename.html' in os.listdir(test_dir)
+    # rename dir
+    src_filepath = test_dir + os.sep + 'INNER_DIR'
+    kwargs = {'src': src_filepath, 'rename_text': 'RENAME'}
+    op.rename_append(**kwargs)
+    assert 'INNER_DIR' not in os.listdir(test_dir)
+    assert 'INNER_DIR_RENAME' in os.listdir(test_dir)

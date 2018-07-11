@@ -86,13 +86,16 @@ class Operations(object):
             rename_text = kwargs['rename_text']
             if src_files:
                 for fl in src_files:
-                    if os.path.isdir(src_dir) and os.path.isdir(src_dir + os.sep + fl):
-                        os.rename(src_dir + os.sep + fl, src_dir + os.sep + rename_text)
-                        print('Renaming {} to {}'.format(src_dir + os.sep + fl, src_dir + os.sep + rename_text))
-                    else:
-                        ext = fl.split('.')[1]
-                        os.rename(src_dir + os.sep + fl, src_dir + os.sep + rename_text + '.' + ext)
-                        print('Renaming {} to {}'.format(src_dir + os.sep + fl, src_dir + os.sep + rename_text + '.' + ext))
+                    try:
+                        if os.path.isdir(src_dir) and os.path.isdir(src_dir + os.sep + fl):
+                            os.rename(src_dir + os.sep + fl, src_dir + os.sep + rename_text)
+                            print('Renaming {} to {}'.format(src_dir + os.sep + fl, src_dir + os.sep + rename_text))
+                        else:
+                            ext = fl.split('.')[1]
+                            os.rename(src_dir + os.sep + fl, src_dir + os.sep + rename_text + '.' + ext)
+                            print('Renaming {} to {}'.format(src_dir + os.sep + fl, src_dir + os.sep + rename_text + '.' + ext))
+                    except OSError:
+                        print('Error Renaming {}'.format(src_dir + os.sep + fl))
             else:
                 base_dir = os.sep.join(src_dir.split(os.sep)[:-1])
                 os.rename(src_dir,  base_dir + os.sep + rename_text)
@@ -117,13 +120,20 @@ class Operations(object):
             separator = '_' if 'separator' not in kwargs else kwargs['separator']
             if src_files:
                 for fl in src_files:
-                    os.rename(src_dir + os.sep + fl, src_dir + os.sep + rename_text + separator + fl)
-                    print('Renaming {} to {}'.format(src_dir + os.sep + fl, src_dir + os.sep + rename_text + separator + fl))
+                    try:
+                        os.rename(src_dir + os.sep + fl, src_dir + os.sep + rename_text + separator + fl)
+                        print('Renaming {} to {}'.format(src_dir + os.sep + fl, src_dir + os.sep + rename_text + separator + fl))
+                    except OSError:
+                        print('Error Renaming {}'.format(src_dir + os.sep + fl))
             else:
-                base_dir = os.sep.join(src_dir.split(os.sep)[:-1])
-                change_dir = src_dir.split(os.sep)[-1]
-                os.rename(src_dir,  base_dir + os.sep + rename_text + separator + change_dir)
-                print('Renaming {} to {}'.format(src_dir, base_dir + os.sep + rename_text + separator + change_dir))
+                try:
+                    base_dir = os.sep.join(src_dir.split(os.sep)[:-1])
+                    change_dir = src_dir.split(os.sep)[-1]
+                    os.rename(src_dir,  base_dir + os.sep + rename_text + separator + change_dir)
+                    print('Renaming {} to {}'.format(src_dir, base_dir + os.sep + rename_text + separator + change_dir))
+                except OSError:
+                    print('Error Renaming {}'.format(src_dir))
+
         except IOError as err:
             print(err)
 
@@ -144,18 +154,24 @@ class Operations(object):
             separator = '_' if 'separator' not in kwargs else kwargs['separator']
             if src_files:
                 for fl in src_files:
-                    if os.path.isdir(src_dir) and os.path.isdir(src_dir + os.sep + fl):
-                        os.rename(src_dir + os.sep + fl, src_dir + os.sep + fl + separator + rename_text)
-                        print('Renaming {} to {}'.format(src_dir + os.sep + fl, src_dir + os.sep + fl + separator + rename_text))
-                    else:
-                        filename, ext = fl.split('.')
-                        os.rename(src_dir + os.sep + fl, src_dir + os.sep + filename + separator + rename_text + '.' + ext)
-                        print('Renaming {} to {}'.format(src_dir + os.sep + fl, src_dir + os.sep + filename + separator + rename_text + '.' + ext))
+                    try:
+                        if os.path.isdir(src_dir) and os.path.isdir(src_dir + os.sep + fl):
+                            os.rename(src_dir + os.sep + fl, src_dir + os.sep + fl + separator + rename_text)
+                            print('Renaming {} to {}'.format(src_dir + os.sep + fl, src_dir + os.sep + fl + separator + rename_text))
+                        else:
+                            filename, ext = fl.split('.')
+                            os.rename(src_dir + os.sep + fl, src_dir + os.sep + filename + separator + rename_text + '.' + ext)
+                            print('Renaming {} to {}'.format(src_dir + os.sep + fl, src_dir + os.sep + filename + separator + rename_text + '.' + ext))
+                    except OSError:
+                        print('Error Renaming {}'.format(src_dir + os.sep + fl))
             else:
-                base_dir = os.sep.join(src_dir.split(os.sep)[:-1])
-                change_dir = src_dir.split(os.sep)[-1]
-                os.rename(src_dir,  base_dir + os.sep + change_dir + separator + rename_text)
-                print('Renaming {} to {}'.format(src_dir, base_dir + os.sep + change_dir + separator + rename_text))
+                try:
+                    base_dir = os.sep.join(src_dir.split(os.sep)[:-1])
+                    change_dir = src_dir.split(os.sep)[-1]
+                    os.rename(src_dir,  base_dir + os.sep + change_dir + separator + rename_text)
+                    print('Renaming {} to {}'.format(src_dir, base_dir + os.sep + change_dir + separator + rename_text))
+                except OSError:
+                    print('Error Renaming {}'.format(src_dir))
         except IOError as err:
             print(err)
 

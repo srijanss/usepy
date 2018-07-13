@@ -11,6 +11,7 @@ import os
 import sys
 import shutil
 import inspect
+import re
 
 home_dir = os.path.expanduser('~')
 
@@ -24,6 +25,8 @@ class Operations(object):
         -- Source
             -- File copy
             kwargs['src'] = '/home/srijan/test1.txt' 
+            kwargs['src'] = '/home/srijan/test*' 
+            kwargs['src'] = '/home/srijan/test*.txt' 
             kwargs['src'] = '/home/srijan/{test1.txt,test2.txt}' 
             kwargs['src'] = '/home/srijan/*' 
             -- Directory copy
@@ -63,7 +66,7 @@ class Operations(object):
                     elif os.path.isdir(dest_dir) and not os.path.isdir(dest_dir + os.sep + dest_file):
                         dest_file = dest_dir + os.sep + dest_file 
                     res_dest = shutil.copy2(src_dir + os.sep + fl, dest_file)
-                    if res_dest == dest_dir + os.sep + fl:
+                    if res_dest == dest_file:
                         print('Copying {} to {}'.format(src_dir + os.sep + fl, res_dest))
                     else:
                         print('Error Copying {} to {}'.format(src_dir + os.sep + fl, res_dest))
@@ -268,9 +271,9 @@ class Operations(object):
             print()
             if dirpath[-1] == '/': # Directory
                 raise IOError('{} File to {} not provided'.format(dirpath, inspect.stack()[1][3]))
-            elif ('{' in (dirpath[-1][0]) and '}' in dirpath[-1][-1]) or '*' in dirpath[-1]:
+            elif ('{' in (dirpath[-1][0]) and '}' in dirpath[-1][-1]) or '/*' in dirpath[-2:]:
                 self.file_exists(dirpath[:-1])
-            file_dir, dir_file = self.parse_files(dirpath)
+            file_dir, dir_file = self.parse_files(dirpath, flag='SRC')
             for fl in dir_file:
                 self.file_exists(file_dir + os.sep + fl)
         elif flag == 'DEST':
@@ -278,7 +281,7 @@ class Operations(object):
             if dirpath[-1] == '/':
                 self.file_exists(dirpath)
                 dirpath = dirpath[:-1]
-            file_dir, dir_file = self.parse_files(dirpath)
+            file_dir, dir_file = self.parse_files(dirpath, flag='DEST')
             dir_file = dir_file[0] if dir_file else dir_file
             if self.file_exists(file_dir):
                 self.file_is_dir(file_dir)
@@ -289,18 +292,24 @@ class Operations(object):
             return []
         return (file_dir, dir_file)
 
-    @staticmethod
-    def parse_files(dirpath):
+    def parse_files(self, dirpath, flag='SRC'):
         pathlist = dirpath.split(os.sep)
         path_to_dir = os.sep.join(pathlist[:-1])
         files = pathlist[-1]
         if files:
             if '{' in (files[0]) and '}' in (files[-1]):
-                files = files[1:-1].split(',')
+                tempfiles = files[1:-1].split(',')
+                files = []
+                for fl in tempfiles:
+                    files.extend(self.get_matching_files(path_to_dir, fl)) 
             elif files[0] == '*':
                 files = os.listdir(path_to_dir)
             else:
-                files = (files,)
+                if flag == 'SRC':
+                    files = self.get_matching_files(path_to_dir, files)
+                else:
+                    files = [files]
+        files = files if files else ''
         return (path_to_dir, files)
 
     @staticmethod
@@ -322,3 +331,14 @@ class Operations(object):
         except FileNotFoundError as err:
             print(err)
             sys.exit(0)
+
+    @staticmethod
+    def get_matching_files(path_to_dir, file):
+        result = []
+        dir_contents = os.listdir(path_to_dir)
+        if len(file) != 1 and not file[0].isalnum():
+            file = r'[a-zA-Z0-9]' + file[0] + '.' + file.split('.')[1] 
+        for fl in dir_contents:
+            if re.match(file, fl):
+                result.append(fl)
+        return result

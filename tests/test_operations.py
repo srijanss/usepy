@@ -58,20 +58,24 @@ def test_file_exists(op):
         op.file_exists(new_dir + os.sep + 'non_existing')
 
 def test_parse_files(op):
-    assert op.parse_files(test_dir) == (os.sep.join(test_dir.split(os.sep)[:-1]), (test_dir.split(os.sep)[-1],))
+    assert op.parse_files(test_dir) == (os.sep.join(test_dir.split(os.sep)[:-1]), [test_dir.split(os.sep)[-1]])
     test_filepath = test_dir + os.sep + 'test.txt'
-    assert op.parse_files(test_filepath) == (os.sep.join(test_filepath.split(os.sep)[:-1]), (test_filepath.split(os.sep)[-1],))
+    assert op.parse_files(test_filepath) == (os.sep.join(test_filepath.split(os.sep)[:-1]), [test_filepath.split(os.sep)[-1]])
+    test_filepath = test_dir + os.sep + 'test*'
+    assert op.parse_files(test_filepath) == (os.sep.join(test_filepath.split(os.sep)[:-1]), ['test.html', 'test.txt'])
     test_filepath = test_dir + os.sep
     assert op.parse_files(test_filepath) == (os.sep.join(test_filepath.split(os.sep)[:-1]), '')
     test_filepath = test_dir + os.sep + '{test.txt,main.css,test.html}'
     assert op.parse_files(test_filepath) == (os.sep.join(test_filepath.split(os.sep)[:-1]), ['test.txt', 'main.css', 'test.html',])
+    test_filepath = test_dir + os.sep + '{test*,*.css}'
+    assert op.parse_files(test_filepath) == (os.sep.join(test_filepath.split(os.sep)[:-1]), ['test.html', 'test.txt', 'main.css'])
     test_filepath = test_dir + os.sep + '*'
     test_dir_contents = ['test.txt', 'main.css', 'test.html', 'INNER_DIR', 'NEW_DIR', 'SYMLINK']
     dirpath, files = op.parse_files(test_filepath)
     for fl in test_dir_contents:
         assert fl in files
     test_filepath = test_dir + os.sep + '-'
-    assert op.parse_files(test_filepath) == (os.sep.join(test_filepath.split(os.sep)[:-1]), ('-',))
+    assert op.parse_files(test_filepath) == (os.sep.join(test_filepath.split(os.sep)[:-1]), '')
 
 def test_is_valid_file(op):
     assert op.is_valid_file(test_dir, flag='TEST') == []
@@ -79,7 +83,7 @@ def test_is_valid_file(op):
     with raises(IOError):
         assert op.is_valid_file(test_filepath, flag='SRC')
     test_filepath = test_dir + os.sep + 'test.txt'
-    assert op.is_valid_file(test_filepath, flag='SRC') == (os.sep.join(test_filepath.split(os.sep)[:-1]), (test_filepath.split(os.sep)[-1],))
+    assert op.is_valid_file(test_filepath, flag='SRC') == (os.sep.join(test_filepath.split(os.sep)[:-1]), [test_filepath.split(os.sep)[-1]])
     test_filepath = test_dir + os.sep + '{test.txt,main.css,test.html}'
     assert op.is_valid_file(test_filepath, flag='SRC') == (os.sep.join(test_filepath.split(os.sep)[:-1]), ['test.txt', 'main.css', 'test.html',])
     test_filepath = test_dir + os.sep + '*'

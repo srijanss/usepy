@@ -63,6 +63,8 @@ def test_parse_files(op):
     assert op.parse_files(test_filepath) == (os.sep.join(test_filepath.split(os.sep)[:-1]), [test_filepath.split(os.sep)[-1]])
     test_filepath = test_dir + os.sep + 'test*'
     assert op.parse_files(test_filepath) == (os.sep.join(test_filepath.split(os.sep)[:-1]), ['test.html', 'test.txt'])
+    test_filepath = test_dir + os.sep + '*.css'
+    assert op.parse_files(test_filepath) == (os.sep.join(test_filepath.split(os.sep)[:-1]), ['main.css'])
     test_filepath = test_dir + os.sep
     assert op.parse_files(test_filepath) == (os.sep.join(test_filepath.split(os.sep)[:-1]), '')
     test_filepath = test_dir + os.sep + '{test.txt,main.css,test.html}'

@@ -302,8 +302,10 @@ class Operations(object):
                 files = []
                 for fl in tempfiles:
                     files.extend(self.get_matching_files(path_to_dir, fl)) 
-            elif files[0] == '*':
+            elif len(files) == 1 and files[0] == '*':
                 files = os.listdir(path_to_dir)
+            elif files[0] == '*':
+                files = self.get_matching_files(path_to_dir, files)
             else:
                 if flag == 'SRC':
                     files = self.get_matching_files(path_to_dir, files)

@@ -111,8 +111,8 @@ def test_get_md5_checksum(op):
 def test_get_checksum_dict(op):
     test_filepath = test_dir
     md5 = op.get_checksum_dict(test_filepath)
-    for fl in os.listdir(test_filepath):
-        if not os.path.isdir(test_dir + os.sep + fl):
+    for fl in (test_dir + os.sep + fd for fd in os.listdir(test_filepath)):
+        if not os.path.isdir(fl):
             assert md5[fl] == 'd41d8cd98f00b204e9800998ecf8427e'
         else:
             assert isinstance(md5[fl], dict)
@@ -276,4 +276,3 @@ def test_backup(op):
     assert 'test.txt' in new_dir_contents
     inner_dir_contents = os.listdir(new_dir + os.sep + 'INNER_DIR')
     assert 'test.html' in inner_dir_contents
-    

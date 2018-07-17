@@ -264,13 +264,13 @@ class Operations(object):
             src_md5 = self.get_checksum_dict(src_dir) 
             dest_md5 = self.get_checksum_dict(dest_dir) 
             for file, md5hash in src_md5.items():
-                if os.path.isdir(src_dir + os.sep + file):
+                if os.path.isdir(file):
                     if file not in dest_md5:
-                        self.copy(**{'src': src_dir + os.sep + file, 'dest': dest_dir})
+                        self.copy(**{'src': file, 'dest': dest_dir})
                     else:
-                        self.backup(**{'src': src_dir + os.sep + file + '/*', 'dest': dest_dir + os.sep + file + os.sep})
+                        self.backup(**{'src': file + '/*', 'dest': dest_dir + os.sep + file.split('/')[-1] + os.sep})
                 elif file not in dest_md5 or dest_md5[file] != md5hash:
-                    self.copy(**{'src': src_dir + os.sep + file, 'dest': dest_dir})
+                    self.copy(**{'src': file, 'dest': dest_dir})
         except IOError as err:
             print(err)
 
@@ -286,8 +286,10 @@ class Operations(object):
             if dirpath[-1] == '/': # Directory
                 dirpath += '*'
                 # raise IOError('{} File to {} not provided'.format(dirpath, inspect.stack()[1][3]))
-            if ('{' in (dirpath[-1][0]) and '}' in dirpath[-1][-1]) or '/*' in dirpath[-2:]:
-                self.file_exists(dirpath[:-1])
+            if ('{' in (dirpath.split('/')[-1][0]) and '}' in dirpath.split('/')[-1][-1]) or '/*' in dirpath[-2:]:
+                self.file_exists(os.sep.join(dirpath.split('/')[:-1]))
+            else:
+                self.file_exists(dirpath)
             file_dir, dir_file = self.parse_files(dirpath, flag='SRC')
             for fl in dir_file:
                 self.file_exists(file_dir + os.sep + fl)
@@ -375,9 +377,9 @@ class Operations(object):
 
     def get_checksum_dict(self, dirpath):
         md5 = {}
-        for fl in os.listdir(dirpath):
-            if os.path.isdir(dirpath + os.sep + fl):
-                md5[fl] = self.get_checksum_dict(dirpath + os.sep + fl)
+        for fl in (dirpath + os.sep + fd for fd in os.listdir(dirpath)):
+            if os.path.isdir(fl):
+                md5[fl] = self.get_checksum_dict(fl)
             else:
-                md5[fl] = self.get_md5_checksum(dirpath + os.sep + fl)
+                md5[fl] = self.get_md5_checksum(fl)
         return md5

@@ -101,6 +101,22 @@ def test_is_valid_file(op):
     test_filepath = test_dir
     assert op.is_valid_file(test_filepath, flag='DEST') == (test_filepath, '')
 
+def test_get_md5_checksum(op):
+    test_filepath = test_dir + os.sep + 'test.txt'
+    test_filepath2 = test_dir + os.sep + 'test.txt'
+    test_filepath3 = test_dir + os.sep + 'test.html'
+    assert op.get_md5_checksum(test_filepath) == op.get_md5_checksum(test_filepath2)
+    assert op.get_md5_checksum(test_filepath) == op.get_md5_checksum(test_filepath3)
+
+def test_get_checksum_dict(op):
+    test_filepath = test_dir
+    md5 = op.get_checksum_dict(test_filepath)
+    for fl in os.listdir(test_filepath):
+        if not os.path.isdir(test_dir + os.sep + fl):
+            assert md5[fl] == 'd41d8cd98f00b204e9800998ecf8427e'
+        else:
+            assert isinstance(md5[fl], dict)
+
 def test_copy(op):
     src_filepath = test_dir + os.sep + 'test.txt'
     dest_filepath = new_dir + os.sep + 'test2.txt'
@@ -248,3 +264,16 @@ def test_rename_append(op):
     op.rename_append(**kwargs)
     assert 'INNER_DIR' not in os.listdir(test_dir)
     assert 'INNER_DIR_RENAME' in os.listdir(test_dir)
+
+def test_backup(op):
+    src_filepath = test_dir + os.sep
+    dest_filepath = new_dir + os.sep
+    kwargs = {'src': src_filepath, 'dest': dest_filepath}
+    kwargs2 = {'src': src_filepath + 'test.html', 'dest': inner_dir}
+    op.copy(**kwargs2)
+    op.backup(**kwargs)
+    new_dir_contents = os.listdir(new_dir)
+    assert 'test.txt' in new_dir_contents
+    inner_dir_contents = os.listdir(new_dir + os.sep + 'INNER_DIR')
+    assert 'test.html' in inner_dir_contents
+    

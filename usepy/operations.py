@@ -12,6 +12,7 @@ import sys
 import shutil
 import inspect
 import re
+import hashlib
 
 home_dir = os.path.expanduser('~')
 
@@ -257,7 +258,21 @@ class Operations(object):
             -- Backup to destination folder
             kwargs['dest'] = '/home/srijan/copyto'
         """
-        pass
+        try:
+            src_dir, src_files = self.is_valid_file(kwargs['src'], flag='SRC')
+            dest_dir, dest_file = self.is_valid_file(kwargs['dest'], flag='DEST')
+            src_md5 = self.get_checksum_dict(src_dir) 
+            dest_md5 = self.get_checksum_dict(dest_dir) 
+            for file, md5hash in src_md5.items():
+                if os.path.isdir(src_dir + os.sep + file):
+                    if file not in dest_md5:
+                        self.copy(**{'src': src_dir + os.sep + file, 'dest': dest_dir})
+                    else:
+                        self.backup(**{'src': src_dir + os.sep + file + '/*', 'dest': dest_dir + os.sep + file + os.sep})
+                elif file not in dest_md5 or dest_md5[file] != md5hash:
+                    self.copy(**{'src': src_dir + os.sep + file, 'dest': dest_dir})
+        except IOError as err:
+            print(err)
 
     def encrypt(self, **kwargs):
         pass
@@ -268,7 +283,6 @@ class Operations(object):
     def is_valid_file(self, dirpath, flag='SRC'):
         if flag == 'SRC':
             # Source file Exists
-            print()
             if dirpath[-1] == '/': # Directory
                 dirpath += '*'
                 # raise IOError('{} File to {} not provided'.format(dirpath, inspect.stack()[1][3]))
@@ -345,3 +359,25 @@ class Operations(object):
             if re.match(file, fl):
                 result.append(fl)
         return result
+
+    @staticmethod
+    def get_md5_checksum(file):
+        """
+        md5 hash of a file is hash of its contents
+        hash of empty file is 'd41d8cd98f00b204e9800998ecf8427e'
+        """
+        md5 = hashlib.md5()
+        bytesize = 4096
+        with open(file, 'rb') as fl:
+            for chunk in iter(lambda: fl.read(bytesize), b''):
+                md5.update(chunk)
+        return md5.hexdigest()
+
+    def get_checksum_dict(self, dirpath):
+        md5 = {}
+        for fl in os.listdir(dirpath):
+            if os.path.isdir(dirpath + os.sep + fl):
+                md5[fl] = self.get_checksum_dict(dirpath + os.sep + fl)
+            else:
+                md5[fl] = self.get_md5_checksum(dirpath + os.sep + fl)
+        return md5

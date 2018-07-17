@@ -82,8 +82,9 @@ def test_parse_files(op):
 def test_is_valid_file(op):
     assert op.is_valid_file(test_dir, flag='TEST') == []
     test_filepath = test_dir + os.sep
-    with raises(IOError):
-        assert op.is_valid_file(test_filepath, flag='SRC')
+    assert op.is_valid_file(test_filepath, flag='SRC') == (os.sep.join(test_filepath.split(os.sep)[:-1]), ['INNER_DIR', 'last.txt', 'main.css', 'NEW_DIR', 'SYMLINK', 'test.html', 'test.txt'])
+    # with raises(IOError):
+    #     assert op.is_valid_file(test_filepath, flag='SRC')
     test_filepath = test_dir + os.sep + 'test.txt'
     assert op.is_valid_file(test_filepath, flag='SRC') == (os.sep.join(test_filepath.split(os.sep)[:-1]), [test_filepath.split(os.sep)[-1]])
     test_filepath = test_dir + os.sep + '{test.txt,main.css,test.html}'

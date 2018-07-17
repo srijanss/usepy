@@ -270,8 +270,9 @@ class Operations(object):
             # Source file Exists
             print()
             if dirpath[-1] == '/': # Directory
-                raise IOError('{} File to {} not provided'.format(dirpath, inspect.stack()[1][3]))
-            elif ('{' in (dirpath[-1][0]) and '}' in dirpath[-1][-1]) or '/*' in dirpath[-2:]:
+                dirpath += '*'
+                # raise IOError('{} File to {} not provided'.format(dirpath, inspect.stack()[1][3]))
+            if ('{' in (dirpath[-1][0]) and '}' in dirpath[-1][-1]) or '/*' in dirpath[-2:]:
                 self.file_exists(dirpath[:-1])
             file_dir, dir_file = self.parse_files(dirpath, flag='SRC')
             for fl in dir_file:
